@@ -1,0 +1,24 @@
+.tittle {
+  color: rgb(24, 240, 132);
+  font-weight: 700;
+  font-size: 50px;
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+}
+
+body {
+  background-color: rgb(25, 25, 25);
+  font-family: arial;
+  text-align: center;
+  margin-top: 100px;
+}
+
+@media (max-width: 680px) {
+  .tittle {
+    body {
+      background-color: rgb(25, 25, 25);
+      font-family: arial;
+      text-align: center;
+      margin-top: 100px;
+    }
+  }
+}

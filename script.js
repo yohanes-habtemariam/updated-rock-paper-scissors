@@ -7,6 +7,7 @@ class RockPaperScissors {
     };
     this.isAutoPlaying = false;
     this.autoPlayInterval = null;
+    this.isAnimating = false;
 
     this.initializeGame();
   }
@@ -18,16 +19,10 @@ class RockPaperScissors {
     this.autoPlayButton = document.querySelector(".js-auto-play-button");
     this.resetButton = document.querySelector(".js-reset-score-button");
 
-    this.resultElement = document.querySelector(".js-result");
-    this.movesElement = document.querySelector(".js-moves");
-    this.scoreElement = document.querySelector(".js-score");
-    this.resetConfirmationElement = document.querySelector(
-      ".js-reset-confirmation"
-    );
-
     this.playerMoveElement = document.getElementById("player-move");
     this.computerMoveElement = document.getElementById("computer-move");
     this.resultDisplayElement = document.getElementById("result");
+    this.scoreElement = document.getElementById("score");
 
     this.bindEvents();
     this.updateScoreDisplay();
@@ -42,9 +37,7 @@ class RockPaperScissors {
     );
 
     this.autoPlayButton.addEventListener("click", () => this.toggleAutoPlay());
-    this.resetButton.addEventListener("click", () =>
-      this.showResetConfirmation()
-    );
+    this.resetButton.addEventListener("click", () => this.resetScore());
 
     document.addEventListener("keydown", (event) => this.handleKeyPress(event));
   }
@@ -57,10 +50,8 @@ class RockPaperScissors {
     const result = this.determineWinner(playerMove, computerMove);
 
     this.updateScore(result);
-
     this.animateGame(playerMove, computerMove, result);
-
-    this.updateGameDisplay(playerMove, computerMove, result);
+    this.updateScoreDisplay();
     this.saveToStorage();
   }
 
@@ -87,12 +78,10 @@ class RockPaperScissors {
   }
 
   showPlayerMove(move) {
-    const emoji = this.getMoveEmoji(move);
     this.playerMoveElement.innerHTML = `<img src="images/${move}-emoji.png" alt="${move}" class="move-icon">`;
   }
 
   showComputerMove(move) {
-    const emoji = this.getMoveEmoji(move);
     this.computerMoveElement.innerHTML = `<img src="images/${move}-emoji.png" alt="${move}" class="move-icon">`;
   }
 
@@ -138,10 +127,13 @@ class RockPaperScissors {
   }
 
   resetAnimationStates() {
-    this.playerMoveElement.innerHTML = "?";
-    this.computerMoveElement.innerHTML = "?";
+    this.playerMoveElement.innerHTML =
+      '<img src="images/rock-emoji.png" alt="?" class="move-icon">';
+    this.computerMoveElement.innerHTML =
+      '<img src="images/rock-emoji.png" alt="?" class="move-icon">';
     this.resultDisplayElement.textContent = "Thinking...";
     this.resultDisplayElement.className = "result";
+    this.resultDisplayElement.classList.remove("win", "lose", "tie");
   }
 
   determineWinner(playerMove, computerMove) {
@@ -180,14 +172,6 @@ class RockPaperScissors {
         this.score.ties++;
         break;
     }
-  }
-
-  updateGameDisplay(playerMove, computerMove, result) {
-    this.resultElement.textContent = result.message;
-    this.movesElement.textContent = `You: ${this.capitalize(
-      playerMove
-    )} | Computer: ${this.capitalize(computerMove)}`;
-    this.updateScoreDisplay();
   }
 
   updateScoreDisplay() {
@@ -233,7 +217,7 @@ class RockPaperScissors {
     }
   }
 
-  showResetConfirmation() {
+  resetScore() {
     if (
       this.score.wins === 0 &&
       this.score.losses === 0 &&
@@ -242,45 +226,23 @@ class RockPaperScissors {
       return;
     }
 
-    const confirmationHTML = `
-            <div class="confirmation-text">
-                Are you sure you want to reset the score?
-            </div>
-            <button class="yes-button js-yes-button">Yes, Reset</button>
-            <button class="no-button js-no-button">No, Keep Score</button>
-        `;
-
-    this.resetConfirmationElement.innerHTML = confirmationHTML;
-
-    // Add event listeners to confirmation buttons
-    document.querySelector(".js-yes-button").addEventListener("click", () => {
-      this.resetScore();
-      this.hideResetConfirmation();
-    });
-
-    document.querySelector(".js-no-button").addEventListener("click", () => {
-      this.hideResetConfirmation();
-    });
-  }
-
-  hideResetConfirmation() {
-    this.resetConfirmationElement.innerHTML = "";
-  }
-
-  resetScore() {
-    this.score = { wins: 0, losses: 0, ties: 0 };
-    this.updateScoreDisplay();
-    this.saveToStorage();
-    this.resetGameDisplay();
-
-    this.animateElement(this.scoreElement, "pulse");
+    if (confirm("Are you sure you want to reset the score?")) {
+      this.score = { wins: 0, losses: 0, ties: 0 };
+      this.updateScoreDisplay();
+      this.saveToStorage();
+      this.resetGameDisplay();
+      this.animateElement(this.scoreElement, "pulse");
+    }
   }
 
   resetGameDisplay() {
-    this.playerMoveElement.innerHTML = "?";
-    this.computerMoveElement.innerHTML = "?";
+    this.playerMoveElement.innerHTML =
+      '<img src="images/rock-emoji.png" alt="?" class="move-icon">';
+    this.computerMoveElement.innerHTML =
+      '<img src="images/rock-emoji.png" alt="?" class="move-icon">';
     this.resultDisplayElement.textContent = "Make your move!";
     this.resultDisplayElement.className = "result";
+    this.resultDisplayElement.classList.remove("win", "lose", "tie");
   }
 
   handleKeyPress(event) {
@@ -305,18 +267,8 @@ class RockPaperScissors {
         break;
       case "escape":
         this.stopAutoPlay();
-        this.hideResetConfirmation();
         break;
     }
-  }
-
-  getMoveEmoji(move) {
-    const emojis = {
-      rock: "✊",
-      paper: "✋",
-      scissors: "✌️",
-    };
-    return emojis[move] || "?";
   }
 
   capitalize(str) {
@@ -328,16 +280,7 @@ class RockPaperScissors {
   }
 }
 
-const additionalCSS = `
-/* Add these to your existing CSS */
-
-`;
-
 document.addEventListener("DOMContentLoaded", () => {
-  const style = document.createElement("style");
-  style.textContent = additionalCSS;
-  document.head.appendChild(style);
-
   window.rpsGame = new RockPaperScissors();
 
   const keyboardHint = document.createElement("div");
